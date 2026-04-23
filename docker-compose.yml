@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  # O servidor que entregará o jogo e fará o roteamento
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - frontend
+      - backend
+
+  # Nosso motor do jogo (Em dev, podemos rodar o Vite direto, em prod o Nginx serve os arquivos)
+  frontend:
+    build: 
+      context: ./frontend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules # Impede que o volume sobrescreva os módulos locais
+    environment:
+      - VITE_API_URL=http://localhost/api
+
+  # Nosso meio de campo para buscar e tratar as obras de arte
+  backend:
+    build:
+      context: ./backend
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    environment:
+      - PORT=3000
+      - REDIS_URL=redis://cache:6379
+    depends_on:
+      - cache
+
+  # O banco de dados em memória para salvar as obras do dia
+  cache:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
