@@ -50,9 +50,8 @@
     * *Definições:* Registra um único endpoint GET no caminho base (`/`), apontando para o método `getArts` do controller.
 
 * **`backend/src/controllers/art.controller.ts`**
-    * *Responsabilidade:* Lógica de controle de requisições de obras de arte.
-    * *Métodos:* `getArts(req, res)` - Uma função assíncrona.
-    * *Estado Atual:* Atualmente, não se conecta ao Redis nem à API externa. Possui uma implementação *Mock* (dados falsos) que retorna um array fixo de objetos (`{ id, title, imageUrl }`) e um status `200` para validar se a comunicação Nginx -> Backend está operante. Contém um bloco `try/catch` para tratamento de erros genéricos (retornando `500`).
+    * *Responsabilidade:* Responsável pela lógica de controle de requisições de obras de arte.
+    * *Definições:* Importa e utiliza `redis.service` e `museum.service`; implementa fluxo de Cache HIT (retorna dados do Redis) e Cache MISS (busca na API externa via `museum.service`, persiste no Redis e retorna os dados). Possui tratamento de erros com retorno de status HTTP 500 em caso de falhas.
 
 * **`backend/src/services/redis.service.ts:`** 
     * *Responsabilidade:* Gerenciar a conexão com o banco de dados Redis em memória utilizando o padrão Singleton. 
@@ -65,6 +64,10 @@
 * **`backend/Dockerfile`**
     * *Responsabilidade:* Definir a imagem Docker e o processo de build do backend.
     * *Definições:* Base recomendada `node:18-alpine`; define diretório de trabalho, copia o código, instala dependências, expõe a porta da aplicação e configura o comando de inicialização do container.
+
+* **`backend/src/services/museum.service.ts`**
+    * *Responsabilidade:* Consumir a API pública do museu (Art Institute of Chicago).
+    * *Definições:* Filtra obras de domínio público, aplica formatação/compressão na URL da imagem e retorna um array padronizado de objetos (`{ id, title, imageUrl }`).
 
 ## 3. Dossiê de Arquivos (Frontend & Infraestrutura)
 

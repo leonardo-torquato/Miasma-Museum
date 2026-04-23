@@ -12,8 +12,8 @@ O foco atual deve permanecer em validar a infraestrutura básica e preparar o mo
 **Frente de Backend (Integração de Dados):**
 * [x] Criar o serviço de conexão com o Redis (`backend/src/services/redis.service.ts`).
 * [x] Popular os arquivos de infraestrutura, package.json e Dockerfile.
-* [ ] Criar o serviço de consumo da API externa de museu (ex: Met Museum) e tratamento/compressão de dados.
-* [ ] Atualizar o `art.controller.ts` para substituir o Mock pela lógica real (Cache `HIT` ou Busca `MISS`).
+* [x] Criar o serviço de consumo da API externa de museu (ex: Met Museum) e tratamento/compressão de dados.
+* [x] Atualizar o `art.controller.ts` para substituir o Mock pela lógica real (Cache `HIT` ou Busca `MISS`).
 
 **Frente de Frontend (Motor do Jogo):**
 * [ ] Inicializar o Three.js no `frontend/src/main.ts` (Cena, Câmera em Primeira Pessoa, WebGLRenderer).

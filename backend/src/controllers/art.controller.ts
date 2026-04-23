@@ -1,29 +1,34 @@
 import { Request, Response } from 'express';
+import { redisService } from '../services/redis.service';
+import { museumService } from '../services/museum.service';
 
-export const getArts = async (req: Request, res: Response) => {
-  try {
-    // TODO: (Próximas Tarefas): 
-    // 1. Checar se as artes estão no cache do Redis.
-    // 2. Se não estiverem, fazer o fetch na API do museu.
-    // 3. Tratar os dados e salvar no Redis.
+export const getArts = async (req: Request, res: Response): Promise<void> => {
+    try {
+        // Permite customizar a quantidade de obras via query param (ex: /api/artes?limit=15)
+        const limit = parseInt(req.query.limit as string) || 10;
+        const cacheKey = `artworks_limit_${limit}`;
 
-    // Mock temporário para testar a rota e o container
-    const mockArts = [
-      { id: "art_001", title: "Retrato Clássico", imageUrl: "https://placeholder.com/art1.jpg" },
-      { id: "art_002", title: "Paisagem Antiga", imageUrl: "https://placeholder.com/art2.jpg" }
-    ];
+        // 1. Tenta buscar no Cache (Redis)
+        const cachedData = await redisService.get(cacheKey);
 
-    res.status(200).json({
-      success: true,
-      source: 'mock', // Útil para debugar depois se veio do 'cache' ou 'api'
-      data: mockArts
-    });
+        if (cachedData) {
+            console.log(`🟢 [Art Controller] Cache HIT para a chave: ${cacheKey}`);
+            res.status(200).json(JSON.parse(cachedData));
+            return;
+        }
 
-  } catch (error) {
-    console.error("[Art Controller] Erro ao buscar obras de arte:", error);
-    res.status(500).json({ 
-      success: false, 
-      message: "Erro interno no servidor ao processar as obras de arte." 
-    });
-  }
+        console.log(`🟡 [Art Controller] Cache MISS para a chave: ${cacheKey}. Buscando na API externa...`);
+
+        // 2. Busca na API Externa (Art Institute of Chicago)
+        const artworks = await museumService.fetchArts(limit);
+
+        // 3. Salva no Cache para requisições futuras (TTL de 1 hora = 3600 segundos)
+        await redisService.set(cacheKey, JSON.stringify(artworks), 3600);
+
+        // 4. Retorna os dados padronizados ao cliente (Vite/Three.js)
+        res.status(200).json(artworks);
+    } catch (error) {
+        console.error('🔴 [Art Controller] Erro ao buscar obras de arte:', error);
+        res.status(500).json({ error: 'Erro interno ao processar requisição de obras de arte.' });
+    }
 };
