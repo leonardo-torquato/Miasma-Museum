@@ -57,6 +57,14 @@
     * *Responsabilidade:* Gerenciar a conexão com o banco de dados Redis em memória utilizando o padrão Singleton. 
     * *Métodos:* Possui métodos encapsulados de leitura (get) e escrita com tempo de expiração (set), e método de conexão (connect) garantindo a resiliência do cache do servidor.
 
+* **`backend/package.json`**
+    * *Responsabilidade:* Declarar dependências, devDependencies e scripts do backend.
+    * *Definições:* Lista dependências como `express` e `ioredis`, inclui pacotes de tipagem TypeScript (ex.: `@types/express`) e scripts de inicialização/teste para facilitar o desenvolvimento e evitar erros de linting no editor.
+
+* **`backend/Dockerfile`**
+    * *Responsabilidade:* Definir a imagem Docker e o processo de build do backend.
+    * *Definições:* Base recomendada `node:18-alpine`; define diretório de trabalho, copia o código, instala dependências, expõe a porta da aplicação e configura o comando de inicialização do container.
+
 ## 3. Dossiê de Arquivos (Frontend & Infraestrutura)
 
 * **`nginx/default.conf`**

@@ -10,7 +10,7 @@ O foco atual deve permanecer em validar a infraestrutura básica e preparar o mo
 
 **Frente de Backend (Integração de Dados):**
 * [x] Criar o serviço de conexão com o Redis (`backend/src/services/redis.service.ts`).
-* [ ] Popular os arquivos de infraestrutura, package.json e Dockerfile.
+* [x] Popular os arquivos de infraestrutura, package.json e Dockerfile.
 * [ ] Criar o serviço de consumo da API externa de museu (ex: Met Museum) e tratamento/compressão de dados.
 * [ ] Atualizar o `art.controller.ts` para substituir o Mock pela lógica real (Cache `HIT` ou Busca `MISS`).
 

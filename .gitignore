@@ -1,0 +1,30 @@
+# Dependências
+node_modules/
+
+# Builds e Arquivos Compilados (Frontend e Backend)
+dist/
+build/
+.tscache/
+
+# Arquivos de Ambiente e Segurança
+.env
+.env.local
+.env.*.local
+
+# Logs de Execução
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# Arquivos de Sistema Operacional e Configurações de IDE
+.DS_Store
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+
+# Arquivos de Cache e Volumes Locais do Docker (se mapeados)
+.docker/
+docker-data/
