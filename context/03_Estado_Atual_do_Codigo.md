@@ -5,10 +5,11 @@
 /mi_sm_
 ├── docker-compose.yml              # Orquestração dos 4 serviços (nginx, frontend, backend, cache)
 ├── README.MD                       # Documentação principal
+├── .gitignore                      # Arquivo de configuração do versionamento
 │
 ├── /backend                        # API Gateway (Node.js + Express)
-│   ├── Dockerfile                  # (Vazio) Dockerfile do backend
-│   ├── package.json                # (Vazio) package.json do backend
+│   ├── Dockerfile                  # Dockerfile do backend
+│   ├── package.json                # package.json do backend
 │   └── /src
 │       ├── server.ts               # Ponto de entrada (App configurado na porta 3000)
 │       ├── /controllers            # Controladores
@@ -71,6 +72,9 @@
     * *Responsabilidade:* Proxy Reverso.
     * *Definições:* Intercepta requisições. O que cai na raiz (`/`) é servido pelo container do frontend. O que cai em `/api` é redirecionado para o container do backend.
     * *Estado Atual:* Vazio.
+* **`.gitignore`**
+    * *Responsabilidade:* Arquivo de configuração na raiz do monorepo.
+    * *Definições:* Evita o versionamento de dependências (`node_modules`), arquivos de build, variáveis de ambiente sensíveis (`.env`) e lixo de sistema/IDE.
 
 * **Pastas e Arquivos Estruturais Pendentes:**
     * `frontend/src/main.ts`: Ponto de entrada do Vite. Atualmente em branco, aguardando a instanciação da cena, câmera e renderizador do Three.js.  

@@ -4,6 +4,7 @@
 * [x] **Arquitetura Base:** Monorepo definido e orquestração configurada via `docker-compose.yml` abrangendo Nginx, Frontend, Backend e Redis.
 * [x] **Esqueleto do Backend:** Ponto de entrada (`server.ts`), estrutura de rotas e o controlador básico de obras de arte (`art.controller.ts`) criados.
 * [x] **Mock de Dados:** Controlador do backend configurado para retornar dados estáticos falsos para garantir que o contêiner de roteamento responda sem quebrar.
+* [x] **Configuração de segurança e versionamento base:** criação do `.gitignore` mapeando as necessidades do monorepo.
 
 ## 2. A Fazer (Em Andamento)
 O foco atual deve permanecer em validar a infraestrutura básica e preparar o motor 3D, iterando de forma atômica, uma tarefa por vez.
