@@ -15,7 +15,8 @@
 │       │   └── art.controller.ts   # Lógica (Atualmente com mock de obras de arte)
 │       ├── /routes                 # Definição de rotas
 │       │   └── art.routes.ts       # Rota configurada (/api/artes)
-│       └── /services               # (Vazio) Futura integração com Redis e API do Museu
+│       └── /services               # Futura integração com Redis e API do Museu
+│           └── redis.service.ts    # [Adicione descrição] 
 │
 ├── /frontend                       # Motor Visual (Vite + Three.js)
 │   ├── Dockerfile                  # (Vazio) Dockerfile do frontend
@@ -52,6 +53,10 @@
     * *Métodos:* `getArts(req, res)` - Uma função assíncrona.
     * *Estado Atual:* Atualmente, não se conecta ao Redis nem à API externa. Possui uma implementação *Mock* (dados falsos) que retorna um array fixo de objetos (`{ id, title, imageUrl }`) e um status `200` para validar se a comunicação Nginx -> Backend está operante. Contém um bloco `try/catch` para tratamento de erros genéricos (retornando `500`).
 
+* **`backend/src/services/redis.service.ts:`** 
+    * *Responsabilidade:* Gerenciar a conexão com o banco de dados Redis em memória utilizando o padrão Singleton. 
+    * *Métodos:* Possui métodos encapsulados de leitura (get) e escrita com tempo de expiração (set), e método de conexão (connect) garantindo a resiliência do cache do servidor.
+
 ## 3. Dossiê de Arquivos (Frontend & Infraestrutura)
 
 * **`nginx/default.conf`**
@@ -60,5 +65,4 @@
     * *Estado Atual:* Vazio.
 
 * **Pastas e Arquivos Estruturais Pendentes:**
-    * `frontend/src/main.ts`: Ponto de entrada do Vite. Atualmente em branco, aguardando a instanciação da cena, câmera e renderizador do Three.js.
-    * `backend/src/services/`: Diretório vazio. Receberá as classes responsáveis por fazer o *fetch* na API externa do Museu e gerenciar a conexão de escrita/leitura com o Redis.    
+    * `frontend/src/main.ts`: Ponto de entrada do Vite. Atualmente em branco, aguardando a instanciação da cena, câmera e renderizador do Three.js.  
