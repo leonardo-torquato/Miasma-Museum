@@ -13,8 +13,8 @@ O foco atual deve permanecer em validar a infraestrutura básica e preparar o mo
 **Frente de Frontend (Motor do Jogo):**
 * [x] Inicializar o Three.js no `frontend/src/main.ts` (Cena, Câmera em Primeira Pessoa, WebGLRenderer).
 * [x] Implementar os controles do jogador (`PointerLockControls` do Three.js e captura de teclas WASD).
-* [ ] Construir a classe básica do "Corredor" em `frontend/src/entities/`, definindo piso, teto e paredes laterais onde os quadros serão afixados.
-* [ ] Criar o serviço (`frontend/src/api/`) para consumir o mock de dados do nosso backend.
+* [x] Construir a classe básica do "Corredor" em `frontend/src/entities/`, definindo piso, teto e paredes laterais onde os quadros serão afixados.
+* [x] Criar o serviço (`frontend/src/api/`) para consumir o mock de dados do nosso backend.
 
 ## 3. Fila de Refinamento (Futuro)
 * [ ] Implementação da mecânica do "Labirinto Não-Euclidiano" (Culling matemático e carregamento dinâmico de corredores baseados no vetor de visão da câmera).

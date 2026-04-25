@@ -20,16 +20,18 @@
 │           └── redis.service.ts    # [Adicione descrição] 
 │
 ├── /frontend                       # Motor Visual (Vite + Three.js)
-│   ├── Dockerfile                  # (Vazio) Dockerfile do frontend
-│   ├── package.json                # (Vazio) package.json do frontend
-│   ├── /public                     # (Vazio) Assets estáticos
+│   ├── Dockerfile                  # Dockerfile do frontend
+│   ├── package.json                # package.json do frontend
+│   ├── /public                     # Assets estáticos
 │   └── /src
 │       ├── main.ts                 # Ponto de entrada do jogo
-│       ├── /api                    # (Vazio) Funções para consumir nosso Backend (não a API pública)
+│       ├── /api                    # Funções para consumir nosso Backend (não a API pública)
+│       │   └── ArtService.ts       # Serviço encapsulado para requisições assíncronas ao backend
 │       ├── /controls               # Controles de jogo (WASD, PointerLock)
 │       │   └── PlayerControls.ts   # Encapsula lógica de movimentação em primeira pessoa
 │       ├── /core                   # (Vazio) Lógica matemática do Three.js (Câmera, Render, Controles)
-│       └── /entities               # (Vazio) Classes dos objetos (Corredor, Quadros, Sensor de Miasma)
+│       └── /entities               # Classes dos objetos 3D do cenário
+│           └── Corridor.ts         # Classe base do corredor do museu (piso, teto, paredes)
 │
 └── /nginx                          # Servidor Web e Proxy Reverso
     └── default.conf                # (Vazio) Redireciona :80 pro front e /api pro back
@@ -77,15 +79,24 @@
     * *Responsabilidade:* Proxy Reverso.
     * *Definições:* Intercepta requisições. O que cai na raiz (`/`) é servido pelo container do frontend. O que cai em `/api` é redirecionado para o container do backend.
     * *Estado Atual:* Vazio.
+
 * **`.gitignore`**
     * *Responsabilidade:* Arquivo de configuração na raiz do monorepo.
     * *Definições:* Evita o versionamento de dependências (`node_modules`), arquivos de build, variáveis de ambiente sensíveis (`.env`) e lixo de sistema/IDE.
+
 * **`frontend/src/main.ts`** 
     * *Responsabilidade:* Ponto de entrada do cliente (Vite). 
-    * *Definições:* Contém a classe GameEngine responsável por inicializar a arquitetura do `Three.js`, a Cena, a Câmara e o Renderizador. Agora inclui um THREE.Clock e orquestra a atualização quadro a quadro da classe PlayerControls.
+    * *Definições:* Ponto de entrada do cliente (Vite). Contém a classe GameEngine responsável por inicializar a arquitetura do Three.js. Agora instancia a entidade Corridor para compor o cenário físico e inclui um sistema de iluminação de baixa intensidade compatível com a estética de terror.
 
 * **`frontend/src/controls/PlayerControls.ts`** 
     * *Responsabilidade:* Responsável por encapsular a lógica de movimentação em primeira pessoa (WASD) e bloqueio de cursor (PointerLockControls).
     * *Definições:* Gerencia a física de inércia e velocidade de forma independente de framerate utilizando tempo delta.
+
+* **`frontend/src/entities/Corridor.ts`** 
+    * *Responsabilidade:* Define a classe base do corredor do museu, construindo piso, teto e paredes utilizando geometria básica do Three.js e materiais sensíveis a fontes de luz, visando encapsular o espaço físico da cena.
+
+* **`frontend/src/api/ArtService.ts`** 
+    * *Responsabilidade:* Serviço encapsulado responsável por realizar requisições assíncronas via fetch para o nosso próprio backend (/api/artes).
+    * *Definições:* Define a interface ArtPiece para tipagem estrita no TypeScript e trata falhas de rede de forma silenciosa para proteger o ciclo de vida do motor 3D.
 
 * **Pastas e Arquivos Estruturais Pendentes:**
