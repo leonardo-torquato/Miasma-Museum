@@ -24,8 +24,10 @@
 │   ├── package.json                # (Vazio) package.json do frontend
 │   ├── /public                     # (Vazio) Assets estáticos
 │   └── /src
-│       ├── main.ts                 # (Vazio) Ponto de entrada do jogo
+│       ├── main.ts                 # Ponto de entrada do jogo
 │       ├── /api                    # (Vazio) Funções para consumir nosso Backend (não a API pública)
+│       ├── /controls               # Controles de jogo (WASD, PointerLock)
+│       │   └── PlayerControls.ts   # Encapsula lógica de movimentação em primeira pessoa
 │       ├── /core                   # (Vazio) Lógica matemática do Three.js (Câmera, Render, Controles)
 │       └── /entities               # (Vazio) Classes dos objetos (Corredor, Quadros, Sensor de Miasma)
 │
@@ -78,6 +80,12 @@
 * **`.gitignore`**
     * *Responsabilidade:* Arquivo de configuração na raiz do monorepo.
     * *Definições:* Evita o versionamento de dependências (`node_modules`), arquivos de build, variáveis de ambiente sensíveis (`.env`) e lixo de sistema/IDE.
+* **`frontend/src/main.ts`** 
+    * *Responsabilidade:* Ponto de entrada do cliente (Vite). 
+    * *Definições:* Contém a classe GameEngine responsável por inicializar a arquitetura do `Three.js`, a Cena, a Câmara e o Renderizador. Agora inclui um THREE.Clock e orquestra a atualização quadro a quadro da classe PlayerControls.
+
+* **`frontend/src/controls/PlayerControls.ts`** 
+    * *Responsabilidade:* Responsável por encapsular a lógica de movimentação em primeira pessoa (WASD) e bloqueio de cursor (PointerLockControls).
+    * *Definições:* Gerencia a física de inércia e velocidade de forma independente de framerate utilizando tempo delta.
 
 * **Pastas e Arquivos Estruturais Pendentes:**
-    * `frontend/src/main.ts`: Ponto de entrada do Vite. Atualmente em branco, aguardando a instanciação da cena, câmera e renderizador do Three.js.  
