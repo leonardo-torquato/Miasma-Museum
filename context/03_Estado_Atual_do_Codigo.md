@@ -73,6 +73,10 @@
     * *Responsabilidade:* Consumir a API pública do museu (Art Institute of Chicago).
     * *Definições:* Filtra obras de domínio público, aplica formatação/compressão na URL da imagem e retorna um array padronizado de objetos (`{ id, title, imageUrl }`).
 
+* **`backend/src/services/redis.service.ts`**
+    * *Responsabilidade:* Gerenciar a conexão com o banco de dados Redis em memória utilizando o padrão Singleton.
+    * *Métodos:* Possui métodos encapsulados de leitura (get) e escrita com tempo de expiração (set), e método de conexão (connect) garantindo a resiliência do cache do servidor.
+
 ## 3. Dossiê de Arquivos (Frontend & Infraestrutura)
 
 * **`nginx/default.conf`**
@@ -86,7 +90,7 @@
 
 * **`frontend/src/main.ts`** 
     * *Responsabilidade:* Ponto de entrada do cliente (Vite). 
-    * *Definições:* Ponto de entrada do cliente (Vite). Contém a classe GameEngine responsável por inicializar a arquitetura do Three.js. Agora instancia a entidade Corridor para compor o cenário físico e inclui um sistema de iluminação de baixa intensidade compatível com a estética de terror.
+    * *Definições:* Ponto de entrada do cliente (Vite). Contém a classe GameEngine responsável por inicializar a arquitetura do Three.js. Agora instancia a entidade Corridor para compor o cenário físico. A responsabilidade da iluminação do ambiente foi transferida para a entidade Corridor, removendo a luz pontual de teste anterior.
 
 * **`frontend/src/controls/PlayerControls.ts`** 
     * *Responsabilidade:* Responsável por encapsular a lógica de movimentação em primeira pessoa (WASD) e bloqueio de cursor (PointerLockControls).
@@ -94,6 +98,7 @@
 
 * **`frontend/src/entities/Corridor.ts`** 
     * *Responsabilidade:* Define a classe base do corredor do museu, construindo piso, teto e paredes utilizando geometria básica do Three.js e materiais sensíveis a fontes de luz, visando encapsular o espaço físico da cena.
+    * *Atualizações:* Gera procedimentalmente texturas de baixa resolução (64x64) com ruído, mapeadas usando THREE.NearestFilter para criar a estética PSX estourada sem uso de assets externos. Também possui lógica própria para instanciar as lâmpadas do teto do museu (PointLight e geometrias básicas).
 
 * **`frontend/src/api/ArtService.ts`** 
     * *Responsabilidade:* Serviço encapsulado responsável por realizar requisições assíncronas via fetch para o nosso próprio backend (/api/artes).

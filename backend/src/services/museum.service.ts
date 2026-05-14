@@ -4,6 +4,8 @@ export interface ArtWork {
     id: string;
     title: string;
     imageUrl: string;
+    width: number;   // largura original da imagem (para calcular proporção do frame)
+    height: number;  // altura original da imagem (para calcular proporção do frame)
 }
 
 class MuseumService {
@@ -12,16 +14,16 @@ class MuseumService {
 
     /**
      * Busca obras de arte na API do museu e formata os dados para o padrão do jogo.
-     * @param limit Quantidade de obras a serem retornadas.
+     * @param limit Quantidade de obras a serem retornadas (padrão 30 para o batch do ArtPool).
      */
-    public async fetchArts(limit: number = 10): Promise<ArtWork[]> {
+    public async fetchArts(limit: number = 30): Promise<ArtWork[]> {
         try {
-            // Parâmetros: Domínio público, obrigatoriedade de imagem, limite e campos específicos
             const queryParams = new URLSearchParams({
                 'query[term][is_public_domain]': 'true',
                 'query[exists][field]': 'image_id',
                 'limit': String(limit),
-                'fields': 'id,title,image_id'
+                // 'thumbnail' incluído para obter as dimensões originais da imagem
+                'fields': 'id,title,image_id,thumbnail'
             });
 
             const response = await fetch(`${this.API_URL}?${queryParams.toString()}`);
@@ -32,24 +34,26 @@ class MuseumService {
 
             const data = await response.json();
 
-            // Transformação e padronização dos dados para a nossa interface
-            const artworks: ArtWork[] = data.data.map((art: any) => ({
-                id: String(art.id),
-                title: art.title,
-                // Utilizamos a API IIIF do museu limitando a largura a 843px para economizar banda no front-end
-                imageUrl: `${this.IMAGE_BASE_URL}/${art.image_id}/full/843,/0/default.jpg`
-            }));
+            const artworks: ArtWork[] = data.data
+                // Filtra obras sem imagem ou sem dimensões válidas no thumbnail
+                .filter((art: any) => art.image_id && art.thumbnail?.width && art.thumbnail?.height)
+                .map((art: any) => ({
+                    id: String(art.id),
+                    title: art.title,
+                    imageUrl: `${this.IMAGE_BASE_URL}/${art.image_id}/full/843,/0/default.jpg`,
+                    // Proporção original da imagem: usada pelo frontend para dimensionar o frame
+                    width: art.thumbnail.width,
+                    height: art.thumbnail.height,
+                }));
 
             console.log(`🖼️ [Museum Service] ${artworks.length} obras recuperadas e tratadas.`);
             return artworks;
 
         } catch (error) {
             console.error('❌ [Museum Service] Falha ao buscar obras na API externa:', error);
-            // Lançamos o erro para ser tratado pela camada do Controller
-            throw error; 
+            throw error;
         }
     }
 }
 
-// Exportamos um Singleton para uso no Controller
 export const museumService = new MuseumService();

@@ -1,49 +1,35 @@
 import Redis from 'ioredis';
 
 class RedisService {
-    private client: Redis | null = null;
+    // Declaração estrita da propriedade (Resolve TS2339)
+    private client: Redis;
 
     constructor() {
-        this.connect();
-    }
-
-    private connect() {
-        // Conecta utilizando as variáveis de ambiente ou os padrões do docker-compose
+        // Inicialização imediata no construtor (Resolve TS2564)
+        // O host 'cache' mapeia estritamente para o contêiner do docker-compose
         this.client = new Redis({
-            host: process.env.REDIS_HOST || 'redis',
-            port: Number(process.env.REDIS_PORT) || 6379,
-            retryStrategy: (times) => {
-                // Tenta reconectar com um delay progressivo (máx 2 segundos)
-                return Math.min(times * 50, 2000);
-            }
+            host: 'cache',
+            port: 6379,
         });
 
         this.client.on('connect', () => {
-            console.log('🔗 [Redis] Conexão estabelecida com sucesso.');
+            console.log('✅ [Redis] Conectado com sucesso ao cache');
         });
 
-        this.client.on('error', (err) => {
+        // Tipagem explícita para evitar o Implicit Any (Resolve TS7006)
+        this.client.on('error', (err: any) => {
             console.error('❌ [Redis] Erro de conexão:', err);
         });
     }
 
-    /**
-     * Busca um valor no cache.
-     */
     public async get(key: string): Promise<string | null> {
-        if (!this.client) return null;
-        return await this.client.get(key);
+        return this.client.get(key);
     }
 
-    /**
-     * Salva um valor no cache com tempo de expiração (TTL).
-     * O padrão é 3600 segundos (1 hora).
-     */
-    public async set(key: string, value: string, ttlSeconds: number = 3600): Promise<void> {
-        if (!this.client) return;
-        await this.client.set(key, value, 'EX', ttlSeconds);
+    public async set(key: string, value: string, expirationInSeconds: number = 3600): Promise<void> {
+        await this.client.set(key, value, 'EX', expirationInSeconds);
     }
 }
 
-// Exportamos um Singleton para reaproveitar a mesma conexão na aplicação
-export const redisService = new RedisService();
+// Exporta uma instância única (Singleton) para ser usada no controller
+export default new RedisService();

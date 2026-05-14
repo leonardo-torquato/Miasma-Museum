@@ -1,13 +1,14 @@
 import * as THREE from 'three';
 import { PlayerControls } from './controls/PlayerControls';
 import { Corridor } from './entities/Corridor';
+import { ArtPool } from './api/ArtService';
 
 class GameEngine {
-    private scene: THREE.Scene;
-    private camera: THREE.PerspectiveCamera;
-    private renderer: THREE.WebGLRenderer;
-    private clock: THREE.Clock;
-    private playerControls: PlayerControls;
+    private scene!: THREE.Scene;
+    private camera!: THREE.PerspectiveCamera;
+    private renderer!: THREE.WebGLRenderer;
+    private clock!: THREE.Clock;
+    private playerControls!: PlayerControls;
 
     constructor() {
         this.init();
@@ -25,10 +26,6 @@ class GameEngine {
         // 2. Iluminação do Museu (Baixa e Atmosférica)
         const ambientLight = new THREE.AmbientLight(0x202020, 1.0); // Luz ambiente quase nula
         this.scene.add(ambientLight);
-        
-        const pointLight = new THREE.PointLight(0xffddaa, 1.5, 10); // Simulando uma luz quente no teto
-        pointLight.position.set(0, 2.8, 0);
-        this.scene.add(pointLight);
 
         // 3. Câmara em Primeira Pessoa
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
@@ -40,9 +37,15 @@ class GameEngine {
         this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         document.body.appendChild(this.renderer.domElement);
 
-        // 5. Instanciação do Cenário (Corredor)
+        // 5. Instanciação do Cenário e Injeção Dinâmica de Obras de Arte
         const initialCorridor = new Corridor();
         this.scene.add(initialCorridor.mesh);
+
+        // Inicializa o pool, adquire 20 obras (≈10 por parede) e popula o corredor
+        const artPool = new ArtPool();
+        artPool.initialize().then(() => {
+            initialCorridor.populateWalls(artPool.acquire(20));
+        });
 
         // 6. Instanciação dos Controles do Jogador
         this.playerControls = new PlayerControls(this.camera, document.body);

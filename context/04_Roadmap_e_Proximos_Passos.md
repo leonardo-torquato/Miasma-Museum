@@ -6,15 +6,19 @@
 * [x] **Mock de Dados:** Controlador do backend configurado para retornar dados estáticos falsos para garantir que o contêiner de roteamento responda sem quebrar.
 * [x] **Configuração de segurança e versionamento base:** criação do `.gitignore` mapeando as necessidades do monorepo.
 * [x] **Infraestrutura de Backend e Dados Concluída:** Configuração de package.json, Dockerfile, criação do serviço de cache (Redis), serviço de consumo da API externa do Museu e integração da lógica de Cache HIT/MISS no `art.controller.ts`.
+* [x] **Motor Three.js Inicializado:** Inicialização do Three.js no `frontend/src/main.ts` com Cena, Câmera em Primeira Pessoa e WebGLRenderer configurados.
+* [x] **Controles do Jogador:** Implementação dos controles de primeira pessoa (`PointerLockControls`) e captura de teclas WASD para movimentação.
+* [x] **Classe do Corredor:** Construção da classe básica "Corredor" em `frontend/src/entities/` com piso, teto e paredes laterais onde os quadros serão afixados.
+* [x] **Serviço de Consumo de API:** Criação do serviço em `frontend/src/api/` para requisições assíncronas ao backend com tipagem em TypeScript.
 
 ## 2. A Fazer (Em Andamento)
 O foco atual deve permanecer em validar a infraestrutura básica e preparar o motor 3D, iterando de forma atômica, uma tarefa por vez.
 
-**Frente de Frontend (Motor do Jogo):**
-* [x] Inicializar o Three.js no `frontend/src/main.ts` (Cena, Câmera em Primeira Pessoa, WebGLRenderer).
-* [x] Implementar os controles do jogador (`PointerLockControls` do Three.js e captura de teclas WASD).
-* [x] Construir a classe básica do "Corredor" em `frontend/src/entities/`, definindo piso, teto e paredes laterais onde os quadros serão afixados.
-* [x] Criar o serviço (`frontend/src/api/`) para consumir o mock de dados do nosso backend.
+**Frente de Direção de Arte e Interação**
+* `[x]` Criar e aplicar texturas estilo PSX (baixa resolução, pixeladas) nas superfícies do `Corridor.ts`.
+* `[x]` Implementar iluminação orgânica no teto do museu e gerar texturas procedurais com NearestFilter para estética PSX em Corridor.ts.
+* `[ ]` Criar a entidade do "Quadro" (ArtPiece) no Three.js e anexar dinamicamente os dados recebidos pelo `ArtService`.
+* `[ ]` Implementar Raycaster para detectar quando o jogador está olhando para uma obra de arte e exibir seus detalhes na UI.
 
 ## 3. Fila de Refinamento (Futuro)
 * [ ] Implementação da mecânica do "Labirinto Não-Euclidiano" (Culling matemático e carregamento dinâmico de corredores baseados no vetor de visão da câmera).

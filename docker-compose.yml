@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # O servidor que entregará o jogo e fará o roteamento
   nginx:
@@ -16,6 +14,8 @@ services:
   frontend:
     build: 
       context: ./frontend
+    ports:
+      - "5173:5173"
     volumes:
       - ./frontend:/app
       - /app/node_modules # Impede que o volume sobrescreva os módulos locais
