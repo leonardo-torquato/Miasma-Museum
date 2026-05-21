@@ -17,7 +17,7 @@ O foco atual deve permanecer em validar a infraestrutura básica e preparar o mo
 **Frente de Direção de Arte e Interação**
 * `[x]` Criar e aplicar texturas estilo PSX (baixa resolução, pixeladas) nas superfícies do `Corridor.ts`.
 * `[x]` Implementar iluminação orgânica no teto do museu e gerar texturas procedurais com NearestFilter para estética PSX em Corridor.ts.
-* `[ ]` Criar a entidade do "Quadro" (ArtPiece) no Three.js e anexar dinamicamente os dados recebidos pelo `ArtService`.
+* `[x]` Criar a entidade do "Quadro" (`Frame`) no Three.js e anexar dinamicamente os dados recebidos pelo `ArtPool`. Implementado com Salon Hanging (Rejection Sampling + AABB), batch prefetching, dimensionamento proporcional à obra real e suporte a formas retângulo e oval.
 * `[ ]` Implementar Raycaster para detectar quando o jogador está olhando para uma obra de arte e exibir seus detalhes na UI.
 
 ## 3. Fila de Refinamento (Futuro)

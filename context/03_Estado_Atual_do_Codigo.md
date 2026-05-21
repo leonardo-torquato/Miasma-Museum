@@ -13,9 +13,11 @@
 │   └── /src
 │       ├── server.ts               # Ponto de entrada (App configurado na porta 3000)
 │       ├── /controllers            # Controladores
-│       │   └── art.controller.ts   # Lógica (Atualmente com mock de obras de arte)
+│       │   ├── art.controller.ts   # Lógica de obras de arte (Cache HIT/MISS + graceful degradation)
+│       │   └── image.controller.ts # Proxy genérico de imagens externas (anti-CORS)
 │       ├── /routes                 # Definição de rotas
-│       │   └── art.routes.ts       # Rota configurada (/api/artes)
+│       │   ├── art.routes.ts       # Rota GET /api/artes
+│       │   └── image.routes.ts     # Rota GET /api/imagens?src=<url>
 │       └── /services               # Futura integração com Redis e API do Museu
 │           └── redis.service.ts    # [Adicione descrição] 
 │
@@ -45,8 +47,7 @@
 
 * **`backend/src/server.ts`**
     * *Responsabilidade:* Ponto de entrada do serviço de API.
-    * *Importações:* Importa `express` e o roteador de artes (`art.routes.ts`).
-    * *Definições:* Instancia o Express, aplica middleware para parseamento de JSON (`express.json()`), registra o prefixo `/api/artes` para as rotas e inicia o listener na porta definida pelo ambiente (ou 3000).
+    * *Definições:* Instancia o Express, aplica `express.json()`, registra `/api/artes` (artRoutes) e `/api/imagens` (imageRoutes). Listener na porta definida pelo ambiente (ou 3000).
 
 * **`backend/src/routes/art.routes.ts`**
     * *Responsabilidade:* Roteamento específico do domínio de obras de arte.
@@ -54,8 +55,16 @@
     * *Definições:* Registra um único endpoint GET no caminho base (`/`), apontando para o método `getArts` do controller.
 
 * **`backend/src/controllers/art.controller.ts`**
-    * *Responsabilidade:* Responsável pela lógica de controle de requisições de obras de arte.
-    * *Definições:* Importa e utiliza `redis.service` e `museum.service`; implementa fluxo de Cache HIT (retorna dados do Redis) e Cache MISS (busca na API externa via `museum.service`, persiste no Redis e retorna os dados). Possui tratamento de erros com retorno de status HTTP 500 em caso de falhas.
+    * *Responsabilidade:* Lógica de controle de requisições de obras de arte.
+    * *Definições:* Fluxo Cache HIT/MISS com Redis (`arts_cache_v3`). Fallback com 4 imagens Unsplash roteadas pelo proxy interno (`/api/imagens?src=...`) para evitar CORS mesmo no fallback. Retorna sempre HTTP 200 (graceful degradation) para não quebrar o motor 3D.
+
+* **`backend/src/controllers/image.controller.ts`**
+    * *Responsabilidade:* Proxy genérico de imagens externas.
+    * *Definições:* Aceita `GET /api/imagens?src=<url-encoded>`. Faz a requisição server-to-server ao servidor externo com headers `User-Agent` e `Accept` adequados, retorna o JPEG com `Cache-Control: public, max-age=86400`. Elimina restrições de CORS no browser para qualquer URL de imagem.
+
+* **`backend/src/routes/image.routes.ts`**
+    * *Responsabilidade:* Definição da rota do proxy de imagens.
+    * *Definições:* Registra `GET /` (montada em `/api/imagens`) apontando para `getImage`.
 
 * **`backend/src/services/redis.service.ts:`** 
     * *Responsabilidade:* Gerenciar a conexão com o banco de dados Redis em memória utilizando o padrão Singleton. 
@@ -70,8 +79,8 @@
     * *Definições:* Base recomendada `node:18-alpine`; define diretório de trabalho, copia o código, instala dependências, expõe a porta da aplicação e configura o comando de inicialização do container.
 
 * **`backend/src/services/museum.service.ts`**
-    * *Responsabilidade:* Consumir a API pública do museu (Art Institute of Chicago).
-    * *Definições:* Filtra obras de domínio público, aplica formatação/compressão na URL da imagem e retorna um array padronizado de objetos (`{ id, title, imageUrl }`).
+    * *Responsabilidade:* Consumir a API pública do Metropolitan Museum of Art.
+    * *Definições:* API migrada de ARTIC para Met (ARTIC exige pagamento por imagens — 402). Fluxo em 2 etapas: (1) `GET /objects?departmentIds=11&isPublicDomain=true` retorna 2644 IDs de Pinturas Europeias; (2) `randomSample(IDs, limit*2)` seguido de `Promise.allSettled` para buscar objetos em paralelo. Filtra por `isPublicDomain && primaryImageSmall`. `imageUrl` retorna `/api/imagens?src=<url-encoded>` (passa pelo proxy interno). `width/height` são placeholders 843×843 — proporção real lida de `texture.image.naturalWidth/Height` no `Frame.ts`.
 
 * **`backend/src/services/redis.service.ts`**
     * *Responsabilidade:* Gerenciar a conexão com o banco de dados Redis em memória utilizando o padrão Singleton.
@@ -89,19 +98,23 @@
     * *Definições:* Evita o versionamento de dependências (`node_modules`), arquivos de build, variáveis de ambiente sensíveis (`.env`) e lixo de sistema/IDE.
 
 * **`frontend/src/main.ts`** 
-    * *Responsabilidade:* Ponto de entrada do cliente (Vite). 
-    * *Definições:* Ponto de entrada do cliente (Vite). Contém a classe GameEngine responsável por inicializar a arquitetura do Three.js. Agora instancia a entidade Corridor para compor o cenário físico. A responsabilidade da iluminação do ambiente foi transferida para a entidade Corridor, removendo a luz pontual de teste anterior.
+    * *Responsabilidade:* Ponto de entrada do cliente (Vite).
+    * *Definições:* Contém a classe `GameEngine` responsável por inicializar a arquitetura do Three.js (Cena, Câmera, Renderer, Fog, PlayerControls). Instancia `ArtPool`, chama `initialize()` para carregar o primeiro lote e passa `artPool.acquire(20)` para `corridor.populateWalls()`. A iluminação ambiente e de teto é gerenciada pela própria entidade `Corridor`.
 
 * **`frontend/src/controls/PlayerControls.ts`** 
     * *Responsabilidade:* Responsável por encapsular a lógica de movimentação em primeira pessoa (WASD) e bloqueio de cursor (PointerLockControls).
     * *Definições:* Gerencia a física de inércia e velocidade de forma independente de framerate utilizando tempo delta.
 
 * **`frontend/src/entities/Corridor.ts`** 
-    * *Responsabilidade:* Define a classe base do corredor do museu, construindo piso, teto e paredes utilizando geometria básica do Three.js e materiais sensíveis a fontes de luz, visando encapsular o espaço físico da cena.
-    * *Atualizações:* Gera procedimentalmente texturas de baixa resolução (64x64) com ruído, mapeadas usando THREE.NearestFilter para criar a estética PSX estourada sem uso de assets externos. Também possui lógica própria para instanciar as lâmpadas do teto do museu (PointLight e geometrias básicas).
+    * *Responsabilidade:* Define a classe base do corredor do museu, construindo piso, teto, paredes e quadros.
+    * *Definições:* Gera procedimentalmente texturas PSX (64x64, NearestFilter). Instancia lâmpadas de teto (PointLight + BoxGeometry). Método `populateWalls(arts)` substitui o antigo `addArtPieces`: divide as obras entre parede esquerda e direita, calcula o layout via `computeSalonLayout` (Rejection Sampling com AABB), depois carrega as texturas em paralelo via `Promise.all` (fire-and-forget). Interface interna `FrameLayout` descreve posição e dimensões pré-computadas de cada quadro no plano 2D da parede (`u` = eixo Z do corredor, `v` = altura Y).
+
+* **`frontend/src/entities/Frame.ts`**
+    * *Responsabilidade:* Representa um quadro físico na parede do museu.
+    * *Definições:* Factory assíncrona estática `Frame.create(art, maxSize)` carrega a textura e monta o mesh 3D. `Frame.computeDimensions(art, maxSize)` é síncrono e estático — permite que `Corridor` calcule o layout AABB antes do carregamento das texturas. Formas disponíveis: retângulo (~86%) e oval (~14%), escolhidas deterministicamente pelo hash do ID da obra. Falha silenciosa: quadro escuro em caso de erro de rede. Expõe `mesh.userData` (`isArt`, `id`, `title`) para o futuro Raycaster.
 
 * **`frontend/src/api/ArtService.ts`** 
-    * *Responsabilidade:* Serviço encapsulado responsável por realizar requisições assíncronas via fetch para o nosso próprio backend (/api/artes).
-    * *Definições:* Define a interface ArtPiece para tipagem estrita no TypeScript e trata falhas de rede de forma silenciosa para proteger o ciclo de vida do motor 3D.
+    * *Responsabilidade:* Pool de obras de arte do jogo — gerencia distribuição sem repetição entre corredores.
+    * *Definições:* Exporta a classe `ArtPool` e a interface `ArtPiece` (`{ id, title, imageUrl, width, height }`). `ArtPool` implementa fila FIFO (`pool: ArtPiece[]`), `Set` de IDs consumidos para garantir unicidade entre corredores, e recarga em background (batch prefetching) quando o pool cai abaixo de 8 obras. Método `initialize()` carrega o primeiro lote. Método `acquire(count)` retira obras da fila e as consome.
 
 * **Pastas e Arquivos Estruturais Pendentes:**

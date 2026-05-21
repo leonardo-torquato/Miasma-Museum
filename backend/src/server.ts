@@ -1,14 +1,17 @@
 import express from 'express';
-import artRoutes from './routes/art.routes';
+import artRoutes   from './routes/art.routes';
+import imageRoutes from './routes/image.routes';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware para processar JSON (útil se precisarmos enviar configurações no body futuramente)
 app.use(express.json());
 
-// Registrando a rota principal do nosso proxy
+// Proxy de metadados: retorna JSON com lista de obras
 app.use('/api/artes', artRoutes);
+
+// Proxy de imagens: busca JPEG no ARTIC IIIF e repassa ao cliente (evita CORS)
+app.use('/api/imagens', imageRoutes);
 
 app.listen(PORT, () => {
   console.log(`[Serviço de Artes] Rodando na porta ${PORT}`);

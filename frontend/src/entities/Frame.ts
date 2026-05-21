@@ -48,13 +48,23 @@ export class Frame {
             new THREE.TextureLoader().load(
                 art.imageUrl,
                 (texture) => {
-                    // LinearFilter para imagens reais (diferente do NearestFilter PSX do corredor)
                     texture.magFilter = THREE.LinearFilter;
                     texture.minFilter = THREE.LinearMipmapLinearFilter;
                     texture.generateMipmaps = true;
 
-                    Frame.buildGeometry(group, texture, dimensions, shape);
-                    resolve(new Frame(group, dimensions, art));
+                    // A URL IIIF 'full/843,' preserva a proporção original limitando a largura.
+                    // naturalWidth/naturalHeight do elemento <img> refletem as dimensões reais
+                    // do arquivo baixado — mais confiáveis do que metadados da API.
+                    const img = texture.image as HTMLImageElement;
+                    const realArt = {
+                        ...art,
+                        width: img.naturalWidth || img.width || art.width,
+                        height: img.naturalHeight || img.height || art.height,
+                    };
+                    const realDimensions = Frame.computeDimensions(realArt, maxSize);
+
+                    Frame.buildGeometry(group, texture, realDimensions, shape);
+                    resolve(new Frame(group, realDimensions, art));
                 },
                 undefined,
                 () => {
